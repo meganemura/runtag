@@ -5,7 +5,7 @@ description: Record one child process under XDG and later read whether it is run
 
 # runtag
 
-runtag wraps one command and writes pid and exit outside the repository. It does not decide pass or fail. It does not watch a directory. [spacequery](https://github.com/meganemura/spacequery) reads the job file and watches.
+runtag wraps one command and writes the job file outside the repository. It does not decide pass or fail. It does not watch. [spacequery](https://github.com/meganemura/spacequery) ([npm](https://www.npmjs.com/package/spacequery)) reads and watches that file.
 
 ## When to use
 
@@ -23,7 +23,7 @@ runtag wraps one command and writes pid and exit outside the repository. It does
 1. `runtag exec --detach --cwd <repo> -- npm test`
    Read stdout JSON. Keep `id`.
 2. `spacequery watch runs-in-dir --root <repo> --until status=exited`
-   spacequery reads the job file and watches. Not implemented here. Same root rule as `runtag list --root`. An orphan stays `running` and does not satisfy `status=exited`.
+   [spacequery](https://github.com/meganemura/spacequery) ([npm](https://www.npmjs.com/package/spacequery)) reads and watches the job file. Not this binary. Same root rule as `runtag list --root`. An orphan stays `running` and does not satisfy `status=exited`.
 3. `runtag status <id>`
    Read `exit_code`. Interpret the number yourself. `0` is not a pass label.
 

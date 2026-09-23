@@ -12,7 +12,7 @@ It does not decide pass or fail. A job is `running` or `exited`. When it has exi
    runtag exec --detach --cwd <repo> -- npm test
    ```
 
-2. Wait until that work has left the running set. [spacequery](https://github.com/meganemura/spacequery) watches:
+2. Wait until that work has left the running set. runtag writes the job file. [spacequery](https://github.com/meganemura/spacequery) reads and watches it; this binary does not:
 
    ```sh
    spacequery watch runs-in-dir --root <repo> --until status=exited
@@ -30,7 +30,7 @@ It does not decide pass or fail. A job is `running` or `exited`. When it has exi
 
 Requires Node.js 20 or newer.
 
-Once the package is on npm:
+[runtag](https://www.npmjs.com/package/runtag) is published on npm:
 
 ```sh
 npm i -g runtag
@@ -46,7 +46,7 @@ node dist/cli.js --help
 
 `npm install` in a checkout builds `dist/cli.js`. `npm link` puts `runtag` on `PATH`.
 
-The skill at [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) ships in the package (`node_modules/runtag/skills/runtag/SKILL.md`). Once the GitHub repository is public, an agent can install it from the repository:
+The skill at [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) ships in the package (`node_modules/runtag/skills/runtag/SKILL.md`). An agent can install it from the public repository:
 
 ```sh
 gh skill install meganemura/runtag runtag --scope user --agent claude-code
@@ -131,7 +131,7 @@ If a job file says `running` but the supervisor process is gone, `status` and `l
 
 ## Boundary with spacequery
 
-runtag only records. [spacequery](https://github.com/meganemura/spacequery) reads the job files and can wait:
+runtag writes the job files. [spacequery](https://github.com/meganemura/spacequery) ([npm](https://www.npmjs.com/package/spacequery)) reads and watches them:
 
 ```sh
 spacequery watch runs-in-dir --root <repo> --until status=exited

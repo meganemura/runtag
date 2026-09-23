@@ -6,13 +6,15 @@ Do not treat exit code 0 as a pass label. Status is only `running` or `exited`. 
 
 Agent skill: [skills/runtag/SKILL.md](skills/runtag/SKILL.md). Installed package: `node_modules/runtag/skills/runtag/SKILL.md` (this file at `node_modules/runtag/llms.txt`).
 
-Once published: `npm i -g runtag` or `npx runtag`. From a checkout: `npm install`, then `node dist/cli.js`. Releasing: the first publish is a short-lived token bootstrap; later `v*` tags use OIDC in `publish.yml`. No long-lived `NPM_TOKEN`. See [docs/releasing.md](docs/releasing.md).
+Published as [runtag](https://www.npmjs.com/package/runtag): `npm i -g runtag` or `npx runtag`. From a checkout: `npm install`, then `node dist/cli.js`. Releasing: the first publish is a short-lived token bootstrap; later `v*` tags use OIDC in `publish.yml`. No long-lived `NPM_TOKEN`. See [docs/releasing.md](docs/releasing.md).
+
+To wait on or observe a runtag job, use [spacequery](https://github.com/meganemura/spacequery) ([npm](https://www.npmjs.com/package/spacequery)). runtag writes the job file; spacequery reads and watches it.
 
 ## Flow
 1. `runtag exec --detach --cwd <repo> -- npm test`
    Read stdout JSON. Keep `id`.
 2. `spacequery watch runs-in-dir --root <repo> --until status=exited`
-   [spacequery](https://github.com/meganemura/spacequery) reads the job file and watches. runtag only records. An orphan stays `running` with `orphan: true` and `exit_code` null, and does not satisfy `status=exited`.
+   [spacequery](https://github.com/meganemura/spacequery) ([npm](https://www.npmjs.com/package/spacequery)) reads and watches the job file. runtag only writes it. An orphan stays `running` with `orphan: true` and `exit_code` null, and does not satisfy `status=exited`.
 3. `runtag status <id>`
    Read `exit_code`.
 

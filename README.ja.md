@@ -12,7 +12,7 @@ runtag は、エージェント向けの最小 CLI です。子プロセスを 1
    runtag exec --detach --cwd <repo> -- npm test
    ```
 
-2. その作業が running を抜けるまで待つ。監視は [spacequery](https://github.com/meganemura/spacequery) が行い、このバイナリには入っていません。
+2. その作業が running を抜けるまで待つ。runtag はジョブファイルを書きます。[spacequery](https://github.com/meganemura/spacequery) がそれを読み、監視します。このバイナリは監視しません。
 
    ```sh
    spacequery watch runs-in-dir --root <repo> --until status=exited
@@ -30,7 +30,7 @@ runtag は、エージェント向けの最小 CLI です。子プロセスを 1
 
 Node.js 20 以降が必要です。
 
-npm に公開されたあとは、次で入ります。
+[runtag](https://www.npmjs.com/package/runtag) は npm に公開されています。
 
 ```sh
 npm i -g runtag
@@ -46,7 +46,7 @@ node dist/cli.js --help
 
 checkout で `npm install` すると `dist/cli.js` をビルドします。`PATH` に置くなら `npm link` です。
 
-skill は [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) にあり、パッケージにも入ります（`node_modules/runtag/skills/runtag/SKILL.md`）。GitHub リポジトリが公開されたあとは、リポジトリからエージェントに渡せます。
+skill は [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) にあり、パッケージにも入ります（`node_modules/runtag/skills/runtag/SKILL.md`）。公開リポジトリからエージェントに渡せます。
 
 ```sh
 gh skill install meganemura/runtag runtag --scope user --agent claude-code
@@ -131,7 +131,7 @@ runtag --help
 
 ## spacequery との境界
 
-runtag は記録するだけです。[spacequery](https://github.com/meganemura/spacequery) がジョブファイルを読み、待つことができます。
+runtag はジョブファイルを書きます。[spacequery](https://github.com/meganemura/spacequery)（[npm](https://www.npmjs.com/package/spacequery)）がそれを読み、監視します。
 
 ```sh
 spacequery watch runs-in-dir --root <repo> --until status=exited
