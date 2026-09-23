@@ -1,6 +1,6 @@
 # Releasing
 
-runtag stays on 0.x.0 versions for now. A release is the npm package and a git tag. The package ships compiled JavaScript in `dist/` (the `runtag` bin is `dist/cli.js`), plus `skills/`, `README.md`, `README.ja.md`, `CHANGELOG.md`, `LICENSE`, and `llms.txt`. `dist/` is gitignored. The publish workflow builds it from the tagged commit and publishes that tree. The tarball contains that compiled `dist/` and the files listed above.
+runtag stays on 0.x.0 versions for now. A release is the npm package and a git tag. The package ships compiled JavaScript in `dist/` (the `runtag` bin is `dist/cli.js`), plus `skills/`, `README.md`, `CHANGELOG.md`, `LICENSE`, and `llms.txt`. `dist/` is gitignored. The publish workflow builds it from the tagged commit and publishes that tree. The tarball contains that compiled `dist/` and the files listed above.
 
 `runtag@0.1.0` is on npm. That version was published once with a short-lived token. npm requires the package to exist before a Trusted Publisher can be added, and it does not support the first publish via OIDC. Trusted Publisher is the steady state after that.
 
@@ -26,7 +26,7 @@ The repository has `sha_pinning_required` enabled. `publish.yml` and `ci.yml` pi
 
 1. Move the notes under `## Unreleased` to a new `## 0.x.0 (YYYY-MM-DD)` heading and leave `## Unreleased` empty. Set the same version in `package.json`.
 2. `npm run check && npm test`.
-3. `npm pack --dry-run` and read the file list, the same files as the first release.
+3. `npm pack --dry-run` and read the file list: `dist/`, `skills/`, `README.md`, `CHANGELOG.md`, `LICENSE`, `llms.txt`, and `package.json`. That list omits `src/`, `test/`, and `docs/`.
 4. Commit as `chore: release 0.x.0`. Tag `v0.x.0`. The tag without the leading `v` is the `package.json` version; the workflow stops when they differ. Push the commit and the tag. The tag push starts the workflow. This publish is `publish.yml` only.
 5. Approve the `publish` environment on that Actions run. The approval appears only when the job enters the Environment `publish`. The workflow uses Node 24 on `ubuntu-latest` with the npm registry URL set. It runs `npm ci`, `npm run build`, a check that the build did not modify tracked files, `npm run check`, and `npm test`, then `npm publish`. `dist/` is gitignored, so the new build output is expected and is what gets packed. `prepublishOnly` runs `build`, `check`, and `test` again. The package `engines` field stays `>=20`; Node 24 is the publish job, not a new requirement for people running the bin.
 6. `--notes-file CHANGELOG.md` would paste every version's notes into the release, so extract the version's section first: `awk '/^## 0.x.0/{f=1;next} /^## /{f=0} f' CHANGELOG.md > notes.md`, then `gh release create v0.x.0 --title v0.x.0 --notes-file notes.md`.
