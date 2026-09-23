@@ -15,7 +15,7 @@
     "node": ">=20"
   },
   "bin": {
-    "runtag": "./dist/cli.js"
+    "runtag": "dist/cli.js"
   },
   "files": [
     "dist",
