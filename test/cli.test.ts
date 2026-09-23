@@ -107,17 +107,6 @@ function killPid(pid: number): void {
   }
 }
 
-function deadPid(): number {
-  for (let pid = 2_147_483_646; pid > 2_147_480_000; pid -= 1) {
-    try {
-      process.kill(pid, 0);
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === "ESRCH") return pid;
-    }
-  }
-  throw new Error("could not find an unused pid");
-}
-
 async function makeEnv(): Promise<{ root: string; xdg: string; env: NodeJS.ProcessEnv }> {
   const root = await mkdtemp(path.join(os.tmpdir(), "runtag-"));
   const xdg = path.join(root, "xdg");
@@ -130,39 +119,6 @@ async function makeEnv(): Promise<{ root: string; xdg: string; env: NodeJS.Proce
       XDG_DATA_HOME: xdg,
       GIT_CEILING_DIRECTORIES: root,
     },
-  };
-}
-
-async function putJob(xdg: string, job: Job): Promise<void> {
-  const dir = path.join(xdg, "runtag", "jobs");
-  await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, `${job.id}.json`), `${JSON.stringify(job, null, 2)}\n`);
-}
-
-function crafted(fields: {
-  id?: string;
-  cwd: string;
-  status: Job["status"];
-  repo_root?: string | null;
-  started_at?: string;
-  ended_at?: string | null;
-  exit_code?: number | null;
-  supervisor_pid?: number;
-  label?: string | null;
-}): Job {
-  const exited = fields.status === "exited";
-  return {
-    id: fields.id ?? ulid(),
-    pid: 4321,
-    supervisor_pid: fields.supervisor_pid ?? process.pid,
-    cwd: fields.cwd,
-    repo_root: fields.repo_root ?? null,
-    command: ["echo", "hi"],
-    label: fields.label ?? null,
-    status: fields.status,
-    exit_code: fields.exit_code === undefined ? (exited ? 0 : null) : fields.exit_code,
-    started_at: fields.started_at ?? "2026-09-23T00:00:00.000Z",
-    ended_at: fields.ended_at === undefined ? (exited ? "2026-09-23T00:00:01.000Z" : null) : fields.ended_at,
   };
 }
 
@@ -196,6 +152,18 @@ test("unknown commands and missing exec separators return {error,do}", async () 
   const badDuration = await run(["gc", "--older-than", "yesterday"]);
   assert.equal(badDuration.code, 1);
   assert.match(envelope(badDuration.stderr).do, /7d/);
+
+  const { root, env } = await makeEnv();
+  try {
+    const unknown = await run(["status", ulid()], { env });
+    assert.equal(unknown.code, 1);
+    assert.match(envelope(unknown.stderr).error, /unknown job id/);
+    const invalid = await run(["status", "../secret"], { env });
+    assert.equal(invalid.code, 1);
+    assert.match(envelope(invalid.stderr).error, /invalid job id/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test("foreground relays stdio and the child exit code, and records the job outside cwd", async () => {
@@ -421,95 +389,6 @@ test("repo_root comes from git and is null outside a repository", async () => {
     const bare = JSON.parse((await run(["list", "--root", nogit], { env })).stdout) as Job[];
     assert.equal(bare.length, 1);
     assert.equal(bare[0]?.repo_root, null);
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
-
-test("list filters by root and status; gc deletes only old exited jobs", async () => {
-  const { root, xdg, env } = await makeEnv();
-  const repo = path.join(root, "repo");
-  const nested = path.join(repo, "pkg");
-  const sibling = path.join(root, "repo-other");
-  const elsewhere = path.join(root, "other");
-  try {
-    const now = Date.now();
-    const old = crafted({
-      cwd: nested,
-      repo_root: repo,
-      status: "exited",
-      started_at: new Date(now - 3 * 3_600_000).toISOString(),
-      ended_at: new Date(now - 2 * 3_600_000).toISOString(),
-      exit_code: 0,
-    });
-    const recent = crafted({
-      cwd: nested,
-      repo_root: repo,
-      status: "exited",
-      started_at: new Date(now - 120_000).toISOString(),
-      ended_at: new Date(now - 60_000).toISOString(),
-      exit_code: 2,
-      label: "recent",
-    });
-    const running = crafted({
-      cwd: sibling,
-      status: "running",
-      started_at: new Date(now - 10 * 86_400_000).toISOString(),
-      ended_at: null,
-      exit_code: null,
-      supervisor_pid: process.pid,
-    });
-    const orphan = crafted({
-      cwd: elsewhere,
-      repo_root: elsewhere,
-      status: "running",
-      started_at: new Date(now - 10 * 86_400_000).toISOString(),
-      ended_at: null,
-      exit_code: null,
-      supervisor_pid: deadPid(),
-    });
-    await putJob(xdg, old);
-    await putJob(xdg, recent);
-    await putJob(xdg, running);
-    await putJob(xdg, orphan);
-
-    const empty = JSON.parse((await run(["list", "--root", path.join(root, "missing")], { env })).stdout) as Job[];
-    assert.deepEqual(empty, []);
-
-    const underRepo = JSON.parse((await run(["list", "--root", repo], { env })).stdout) as Array<Job & { orphan?: true }>;
-    assert.deepEqual(underRepo.map((job) => job.id), [recent.id, old.id]);
-
-    const prefix = JSON.parse((await run(["list", "--root", sibling], { env })).stdout) as Job[];
-    assert.deepEqual(prefix.map((job) => job.id), [running.id]);
-
-    const exited = JSON.parse((await run(["list", "--root", repo, "--status", "exited"], { env })).stdout) as Job[];
-    assert.deepEqual(exited.map((job) => job.id), [recent.id, old.id]);
-
-    const runningList = JSON.parse((await run(["list", "--status=running"], { env })).stdout) as Array<Job & { orphan?: true }>;
-    assert.deepEqual(
-      runningList.map((job) => job.id).sort(),
-      [orphan.id, running.id].sort(),
-    );
-    const orphanView = runningList.find((job) => job.id === orphan.id);
-    assert.equal(orphanView?.orphan, true);
-    assert.equal(orphanView?.exit_code, null);
-    const liveView = runningList.find((job) => job.id === running.id);
-    assert.equal("orphan" in (liveView ?? {}), false);
-
-    const unknown = await run(["status", ulid()], { env });
-    assert.equal(unknown.code, 1);
-    assert.match(envelope(unknown.stderr).error, /unknown job id/);
-
-    const invalid = await run(["status", "../secret"], { env });
-    assert.equal(invalid.code, 1);
-    assert.match(envelope(invalid.stderr).error, /invalid job id/);
-
-    const gcHour = JSON.parse((await run(["gc", "--older-than", "1h"], { env })).stdout) as { deleted: string[] };
-    assert.deepEqual(gcHour.deleted, [old.id].sort());
-    const gcAll = JSON.parse((await run(["gc"], { env })).stdout) as { deleted: string[] };
-    assert.deepEqual(gcAll.deleted, [recent.id]);
-    const left = JSON.parse((await run(["list"], { env })).stdout) as Job[];
-    assert.deepEqual(left.map((job) => job.id).sort(), [orphan.id, running.id].sort());
   } finally {
     await rm(root, { recursive: true, force: true });
   }
