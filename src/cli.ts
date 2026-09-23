@@ -14,7 +14,7 @@ It does not judge pass or fail. Status is only running or exited.
 Agent flow:
   1. runtag exec --detach --cwd <repo> -- npm test
   2. spacequery watch runs-in-dir --root <repo> --until status=exited
-     (planned in spacequery; this binary does not watch)
+     (spacequery watches; runtag only records)
   3. runtag status <id>
 
 Usage:

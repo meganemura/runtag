@@ -12,7 +12,7 @@ It does not decide pass or fail. A job is `running` or `exited`. When it has exi
    runtag exec --detach --cwd <repo> -- npm test
    ```
 
-2. Wait until that work has left the running set. This command is planned in spacequery and is not part of this binary:
+2. Wait until that work has left the running set. [spacequery](https://github.com/meganemura/spacequery) watches:
 
    ```sh
    spacequery watch runs-in-dir --root <repo> --until status=exited
@@ -30,12 +30,27 @@ It does not decide pass or fail. A job is `running` or `exited`. When it has exi
 
 Requires Node.js 20 or newer.
 
+Once the package is on npm:
+
+```sh
+npm i -g runtag
+npx runtag --help
+```
+
+From a checkout of this repository:
+
 ```sh
 npm install
 node dist/cli.js --help
 ```
 
-`npm install` builds `dist/cli.js`. You can also run `npx runtag` from this checkout, or `npm link` if you want `runtag` on `PATH`.
+`npm install` in a checkout builds `dist/cli.js`. `npm link` puts `runtag` on `PATH`.
+
+The skill at [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) ships in the package (`node_modules/runtag/skills/runtag/SKILL.md`). Once the GitHub repository is public, an agent can install it from the repository:
+
+```sh
+gh skill install meganemura/runtag runtag --scope user --agent claude-code
+```
 
 ## State
 
@@ -116,13 +131,13 @@ If a job file says `running` but the supervisor process is gone, `status` and `l
 
 ## Boundary with spacequery
 
-runtag only records. spacequery is expected to watch:
+runtag only records. [spacequery](https://github.com/meganemura/spacequery) reads the job files and can wait:
 
 ```sh
 spacequery watch runs-in-dir --root <repo> --until status=exited
 ```
 
-A job is in `<repo>` when `repo_root` or `cwd` equals that directory or is inside it, the same rule as `runtag list --root`. This repository does not implement spacequery.
+A job is in `<repo>` when `repo_root` or `cwd` equals that directory or is inside it, the same rule as `runtag list --root`. An orphan stays `running` with `orphan: true` and a null `exit_code`, so that watch does not finish on it. This repository does not implement spacequery, and spacequery does not run runtag.
 
 ## Non-goals
 
@@ -132,7 +147,13 @@ No daemon, queue, groups, or priorities. No pass/fail state. No job files in the
 
 ```sh
 npm test
-npm run typecheck
+npm run check
 ```
 
+`npm run check` is the typecheck the publish workflow runs.
+
 Agent-facing docs: [`llms.txt`](llms.txt) and [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md).
+
+## Releasing
+
+A `v*` tag publishes the package. One-time setup (public repository, GitHub Environment `publish`, npm trusted publisher) and the per-version steps are in [docs/releasing.md](docs/releasing.md).
