@@ -1,7 +1,9 @@
-# Publishes the npm package for a v* tag.
+# Publishes the npm package for a v* tag. Steady state, after runtag exists on npm.
+# The first publish is a one-time short-lived token bootstrap (docs/releasing.md);
+# npm cannot attach a Trusted Publisher until the package exists.
 # Boundary: checkout the tag, build dist/, run the release checks, and npm publish.
 # The GitHub Environment `publish` approves the run. npm authenticates
-# with that environment's OIDC token. There is no NPM_TOKEN.
+# with that environment's OIDC token. This file never reads NPM_TOKEN.
 name: Publish
 
 on:

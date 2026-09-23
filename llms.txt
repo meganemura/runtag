@@ -6,7 +6,7 @@ Do not treat exit code 0 as a pass label. Status is only `running` or `exited`. 
 
 Agent skill: [skills/runtag/SKILL.md](skills/runtag/SKILL.md). Installed package: `node_modules/runtag/skills/runtag/SKILL.md` (this file at `node_modules/runtag/llms.txt`).
 
-Once published: `npm i -g runtag` or `npx runtag`. From a checkout: `npm install`, then `node dist/cli.js`. Releasing (trusted publisher, no `NPM_TOKEN`): [docs/releasing.md](docs/releasing.md).
+Once published: `npm i -g runtag` or `npx runtag`. From a checkout: `npm install`, then `node dist/cli.js`. Releasing: the first publish is a short-lived token bootstrap; later `v*` tags use OIDC in `publish.yml`. No long-lived `NPM_TOKEN`. See [docs/releasing.md](docs/releasing.md).
 
 ## Flow
 1. `runtag exec --detach --cwd <repo> -- npm test`

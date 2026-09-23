@@ -156,4 +156,4 @@ Agent-facing docs: [`llms.txt`](llms.txt) and [`skills/runtag/SKILL.md`](skills/
 
 ## Releasing
 
-A `v*` tag publishes the package. One-time setup (public repository, GitHub Environment `publish`, npm trusted publisher) and the per-version steps are in [docs/releasing.md](docs/releasing.md).
+Later `v*` tags publish through GitHub Actions OIDC. The first release is a one-time short-lived publish token, then a Trusted Publisher; the repository does not keep an `NPM_TOKEN`. Steps are in [docs/releasing.md](docs/releasing.md).
