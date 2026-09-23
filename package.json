@@ -1,0 +1,29 @@
+{
+  "name": "runtag",
+  "version": "0.1.0",
+  "description": "Record one child process under XDG so an agent can observe pid and exit later.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "runtag": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "llms.txt"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/cli.js",
+    "build:test": "tsc -p tsconfig.test.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "npm run build && npm run build:test && node --enable-source-maps --test --test-reporter spec --test-timeout 20000 dist-test/test/cli.test.js dist-test/test/unit.test.js",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.9.2"
+  }
+}
