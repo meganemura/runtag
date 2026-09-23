@@ -4,6 +4,13 @@
   "description": "Record one child process under XDG so an agent can observe pid and exit later.",
   "type": "module",
   "license": "MIT",
+  "author": "meganemura",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meganemura/runtag.git"
+  },
+  "homepage": "https://github.com/meganemura/runtag#readme",
+  "bugs": "https://github.com/meganemura/runtag/issues",
   "engines": {
     "node": ">=20"
   },
@@ -12,15 +19,21 @@
   },
   "files": [
     "dist",
+    "skills",
     "README.md",
+    "README.ja.md",
+    "CHANGELOG.md",
+    "LICENSE",
     "llms.txt"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json && chmod +x dist/cli.js",
     "build:test": "tsc -p tsconfig.test.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "check": "npm run typecheck",
     "test": "npm run build && npm run build:test && node --enable-source-maps --test --test-reporter spec --test-timeout 20000 dist-test/test/cli.test.js dist-test/test/unit.test.js",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build && npm run check && npm test"
   },
   "devDependencies": {
     "@hegeldev/hegel": "0.4.5",

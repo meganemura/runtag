@@ -12,7 +12,7 @@ runtag は、エージェント向けの最小 CLI です。子プロセスを 1
    runtag exec --detach --cwd <repo> -- npm test
    ```
 
-2. その作業が running を抜けるまで待つ。次のコマンドは spacequery 側の予定であり、このバイナリには入っていません。
+2. その作業が running を抜けるまで待つ。監視は [spacequery](https://github.com/meganemura/spacequery) が行い、このバイナリには入っていません。
 
    ```sh
    spacequery watch runs-in-dir --root <repo> --until status=exited
@@ -30,12 +30,27 @@ runtag は、エージェント向けの最小 CLI です。子プロセスを 1
 
 Node.js 20 以降が必要です。
 
+npm に公開されたあとは、次で入ります。
+
+```sh
+npm i -g runtag
+npx runtag --help
+```
+
+このリポジトリの checkout から使うときは次のとおりです。
+
 ```sh
 npm install
 node dist/cli.js --help
 ```
 
-`npm install` で `dist/cli.js` をビルドします。このディレクトリでは `npx runtag` も使えます。`PATH` に置くなら `npm link` です。
+checkout で `npm install` すると `dist/cli.js` をビルドします。`PATH` に置くなら `npm link` です。
+
+skill は [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) にあり、パッケージにも入ります（`node_modules/runtag/skills/runtag/SKILL.md`）。GitHub リポジトリが公開されたあとは、リポジトリからエージェントに渡せます。
+
+```sh
+gh skill install meganemura/runtag runtag --scope user --agent claude-code
+```
 
 ## 状態
 
@@ -116,13 +131,13 @@ runtag --help
 
 ## spacequery との境界
 
-runtag は記録するだけです。監視は spacequery の予定です。
+runtag は記録するだけです。[spacequery](https://github.com/meganemura/spacequery) がジョブファイルを読み、待つことができます。
 
 ```sh
 spacequery watch runs-in-dir --root <repo> --until status=exited
 ```
 
-`<repo>` に含まれるのは、`repo_root` または `cwd` がそのディレクトリと等しいか、その中にあるジョブです。`runtag list --root` と同じ規則です。このリポジトリは spacequery を実装しません。
+`<repo>` に含まれるのは、`repo_root` または `cwd` がそのディレクトリと等しいか、その中にあるジョブです。`runtag list --root` と同じ規則です。オーファンは `running` のまま、`orphan: true`、`exit_code` は null なので、この watch はそのジョブでは終わりません。このリポジトリは spacequery を実装しません。spacequery は runtag を実行しません。
 
 ## やらないこと
 
@@ -132,7 +147,13 @@ spacequery watch runs-in-dir --root <repo> --until status=exited
 
 ```sh
 npm test
-npm run typecheck
+npm run check
 ```
 
+`npm run check` は、公開ワークフローが走らせる型チェックです。
+
 エージェント向けの説明は [`llms.txt`](llms.txt) と [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) です。
+
+## リリース
+
+パッケージが npm に載ってからは、`v*` タグを GitHub Actions の OIDC で公開します。最初の 1 回だけ有効期限の短い公開トークンを使い、そのあと Trusted Publisher を設定します。長期間の `NPM_TOKEN` は置きません。手順は [docs/releasing.md](docs/releasing.md) にあります。手順の本文は英語です。
