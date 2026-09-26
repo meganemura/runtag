@@ -1,6 +1,6 @@
 # runtag
 
-[![npm version](https://img.shields.io/npm/v/runtag)](https://www.npmjs.com/package/runtag)
+[![npm version](https://img.shields.io/npm/v/runtag?logo=npm)](https://www.npmjs.com/package/runtag)
 
 runtag is a minimal agent-experience CLI. It wraps one child process and records the pid and exit code under XDG, outside the repository you are working in.
 
