@@ -1,9 +1,12 @@
-# Publishes the npm package for a v* tag. Steady state, after runtag exists on npm.
+# Publishes the npm package for a v* tag, then creates the GitHub release.
 # The first publish is a one-time short-lived token bootstrap (docs/releasing.md);
 # npm cannot attach a Trusted Publisher until the package exists.
-# Boundary: checkout the tag, build dist/, run the release checks, and npm publish.
-# The GitHub Environment `publish` approves the run. npm authenticates
-# with that environment's OIDC token. This file never reads NPM_TOKEN.
+# Boundary: the publish job checks out the tag, builds dist/, runs the release
+# checks, and npm publish. The GitHub Environment `publish` approves that job.
+# npm authenticates with that environment's OIDC token. This file never reads
+# NPM_TOKEN. The release job runs only after publish succeeds. It is the only
+# job with contents:write, so that token never sits on a job that can write
+# repository contents. It checks out the commit the publish job checked out.
 name: Publish
 
 on:
@@ -15,11 +18,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment: publish
+    outputs:
+      sha: ${{ steps.checkout.outputs.commit }}
     permissions:
       id-token: write
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        id: checkout
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
@@ -71,5 +77,38 @@ jobs:
             exit 1
           fi
       - run: npm run check
+      - run: npm run archstrict
       - run: npm test
       - run: npm publish
+
+  # Runs only after npm publish succeeds. A separate job keeps contents:write
+  # away from the job that holds the npm OIDC token.
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The publish job may wait on the environment for a long time. Check
+          # out the commit it actually published, not a tag that moved since.
+          ref: ${{ needs.publish.outputs.sha }}
+
+      - name: Create the GitHub release from this version's changelog section
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          # --notes-file CHANGELOG.md would carry every version, so extract only this one.
+          awk -v v="$version" '$0 ~ "^## " v " " {in_version=1; next} /^## /{in_version=0} in_version' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "CHANGELOG.md has no section for ${version}" >&2
+            exit 1
+          fi
+          # A re-run of the same tag must not fail on a release that already exists.
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "release ${GITHUB_REF_NAME} already exists"
+            exit 0
+          fi
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag

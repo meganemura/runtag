@@ -148,9 +148,10 @@ spacequery watch runs-in-dir --root <repo> --until status=exited
 ```sh
 npm test
 npm run check
+npm run archstrict
 ```
 
-`npm run check` は、公開ワークフローが走らせる型チェックです。
+`npm run check` は、公開ワークフローが走らせる型チェックです。`npm run archstrict` は、`src/` の各ファイルが自分より下の層だけを import していることを調べます。
 
 エージェント向けの説明は [`llms.txt`](llms.txt) と [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) です。
 
