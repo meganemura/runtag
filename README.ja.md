@@ -159,4 +159,4 @@ npm run test:scenarios
 
 ## リリース
 
-パッケージが npm に載ってからは、`v*` タグを GitHub Actions の OIDC で公開します。最初の 1 回だけ有効期限の短い公開トークンを使い、そのあと Trusted Publisher を設定します。長期間の `NPM_TOKEN` は置きません。手順は [docs/releasing.md](docs/releasing.md) にあります。手順の本文は英語です。
+パッケージが npm に載ってからは、`main` に入ったバージョンの更新を GitHub Actions の OIDC で公開し、workflow が `v<version>` タグと GitHub リリースを作ります。最初の 1 回だけ有効期限の短い公開トークンを使い、そのあと Trusted Publisher を設定します。長期間の `NPM_TOKEN` は置きません。手順は [docs/releasing.md](docs/releasing.md) にあります。手順の本文は英語です。

@@ -6,6 +6,7 @@ The format follows Keep a Changelog, and the versions follow SemVer. Before 1.0 
 
 - `npm run test:scenarios` runs the agent flow as a nukadoko scenario against the built CLI: `exec --detach`, `status` until the job exits, the exit code, `list --root`, `gc`, and the `{error, do}` envelope of `status` on a collected id. CI runs it after the module-boundary check.
 - The module-boundary check runs on archstrict 0.2.1.
+- A version bump that lands on `main` now publishes the npm package. `publish.yml` runs on a push to `main` that changes `package.json`, publishes when no `v<version>` tag exists yet, and then creates that tag and the GitHub release. Nobody pushes a `v*` tag by hand any more.
 
 ## 0.1.0 (2026-09-23)
 

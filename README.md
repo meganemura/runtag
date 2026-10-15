@@ -160,7 +160,7 @@ Agent-facing docs: [`llms.txt`](llms.txt) and [`skills/runtag/SKILL.md`](skills/
 
 ## Releasing
 
-Later `v*` tags publish through GitHub Actions OIDC. The first release is a one-time short-lived publish token, then a Trusted Publisher; the repository does not keep an `NPM_TOKEN`. Steps are in [docs/releasing.md](docs/releasing.md).
+A later version bump that lands on `main` publishes through GitHub Actions OIDC, and the workflow creates the `v<version>` tag and the GitHub release. The first release is a one-time short-lived publish token, then a Trusted Publisher; the repository does not keep an `NPM_TOKEN`. Steps are in [docs/releasing.md](docs/releasing.md).
 
 ---
 
