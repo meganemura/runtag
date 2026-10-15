@@ -151,9 +151,10 @@ No daemon, queue, groups, or priorities. No pass/fail state. No job files in the
 npm test
 npm run check
 npm run archstrict
+npm run test:scenarios
 ```
 
-`npm run check` is the typecheck the publish workflow runs. `npm run archstrict` checks that each file under `src/` imports only the layers below it.
+`npm run check` is the typecheck the publish workflow runs. `npm run archstrict` checks that each file under `src/` imports only the layers below it. `npm run test:scenarios` runs the agent flow in [`features/`](features/) as a [nukadoko](https://github.com/meganemura/nukadoko) scenario against the built `dist/cli.js`: a detached command, its exit code read back by id, `list --root`, and `gc`.
 
 Agent-facing docs: [`llms.txt`](llms.txt) and [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md).
 

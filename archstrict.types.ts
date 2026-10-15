@@ -52,7 +52,10 @@ export type Config = {
   // more than one file).
   declaredModules: readonly {
     name: ModuleName;
-    glob: string;
+    // One glob, or several paths that share one directory. An array names
+    // a seam inside a flat directory. Paths in different directories are
+    // a config error; use one entry per directory.
+    glob: string | readonly string[];
     // A single glob, or several - a real package can publish more than
     // one real, differently-shaped public entry point at once. Optional:
     // when absent, a real package.json's own exports map at this

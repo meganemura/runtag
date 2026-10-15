@@ -149,9 +149,11 @@ spacequery watch runs-in-dir --root <repo> --until status=exited
 npm test
 npm run check
 npm run archstrict
+npm run test:scenarios
 ```
 
 `npm run check` は、公開ワークフローが走らせる型チェックです。`npm run archstrict` は、`src/` の各ファイルが自分より下の層だけを import していることを調べます。
+`npm run test:scenarios` は、[`features/`](features/) にあるエージェントの流れを [nukadoko](https://github.com/meganemura/nukadoko) のシナリオとして、ビルドした `dist/cli.js` に対して走らせます。切り離して起動したコマンド、id で読み戻す終了コード、`list --root`、`gc` を通します。
 
 エージェント向けの説明は [`llms.txt`](llms.txt) と [`skills/runtag/SKILL.md`](skills/runtag/SKILL.md) です。
 

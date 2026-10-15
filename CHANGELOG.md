@@ -4,6 +4,9 @@ The format follows Keep a Changelog, and the versions follow SemVer. Before 1.0 
 
 ## Unreleased
 
+- `npm run test:scenarios` runs the agent flow as a nukadoko scenario against the built CLI: `exec --detach`, `status` until the job exits, the exit code, `list --root`, `gc`, and the `{error, do}` envelope of `status` on a collected id. CI runs it after the module-boundary check.
+- The module-boundary check runs on archstrict 0.2.1.
+
 ## 0.1.0 (2026-09-23)
 
 runtag records one child process for a coding agent. The record is a JSON file under XDG (`$XDG_DATA_HOME/runtag/jobs/`, or `~/.local/share/runtag/jobs/` when that variable is unset). Nothing is written into the repository the command runs in.
