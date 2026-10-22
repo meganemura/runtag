@@ -30,7 +30,7 @@ It does not decide pass or fail. A job is `running` or `exited`. When it has exi
 
 ## Install
 
-Requires Node.js 20 or newer.
+Requires Node.js 22.23.4 or later on the 22 line, 24.22.1 or later on the 24 line, or 26.12.1 or later.
 
 [runtag](https://www.npmjs.com/package/runtag) is published on npm:
 

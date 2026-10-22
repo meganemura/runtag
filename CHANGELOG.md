@@ -4,6 +4,8 @@ The format follows Keep a Changelog, and the versions follow SemVer. Before 1.0 
 
 ## Unreleased
 
+- This is a breaking change. `engines.node` is `^22.23.4 || ^24.22.1 || >=26.12.1`. Node.js 20, Node.js 23, and Node.js 25 are outside that range.
+
 ## 0.2.0 (2026-10-21)
 
 - `npm run test:scenarios` runs the agent flow as a nukadoko scenario against the built CLI: `exec --detach`, `status` until the job exits, the exit code, `list --root`, `gc`, and the `{error, do}` envelope of `status` on a collected id. CI runs it after the module-boundary check.

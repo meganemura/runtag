@@ -28,7 +28,7 @@ runtag は、エージェント向けの最小 CLI です。子プロセスを 1
 
 ## インストール
 
-Node.js 20 以降が必要です。
+Node.js は 22.23.4 以降の 22 系、24.22.1 以降の 24 系、または 26.12.1 以降が必要です。
 
 [runtag](https://www.npmjs.com/package/runtag) は npm に公開されています。
 
