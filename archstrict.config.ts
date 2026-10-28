@@ -3,8 +3,9 @@ import type { Config } from "./archstrict.types.js";
 // src/ is flat: each file is imported by its own name, so each file is a
 // module. Folding src/ into one directory module would stop checking those
 // imports. test/ reaches into internals on purpose and is not a module.
-// features/ and nukadoko.config.ts run the built CLI as a child process and
-// import nothing from src/, so they are not modules either.
+// features/ and nukadoko.config.ts run the built CLI as a child process, and
+// nukadoko.program.ts builds it. None of them imports from src/, so they are
+// not modules either.
 export default {
   schemaVersion: 1,
   surface: ["index.ts", "index.tsx", "index.mts", "index.cts"],
@@ -16,6 +17,7 @@ export default {
     "test/**",
     "features/**",
     "nukadoko.config.ts",
+    "nukadoko.program.ts",
     // tsc output. Not source, and a built tree must not change the check.
     "dist/**",
     "dist-test/**",
